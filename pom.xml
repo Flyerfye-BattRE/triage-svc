@@ -73,7 +73,7 @@
 
 	<repositories>
 		<repository>
-			<id>github</id>
+			<id>github-battre</id>
 			<name>GitHub Flyerfye-BattRE Apache Maven Packages</name>
 			<url>https://maven.pkg.github.com/flyerfye-battre/grpc-ifc</url>
 			<releases>
