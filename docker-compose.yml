@@ -1,0 +1,17 @@
+version: '3'
+
+networks:
+  my_network:
+    external: true
+    driver: bridge
+
+services:
+  triagesvc:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "50010:50010"
+      - "50015:50015"
+    networks:
+      - my_network
