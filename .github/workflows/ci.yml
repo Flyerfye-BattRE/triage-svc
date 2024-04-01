@@ -2,7 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    # The CI pipeline will currently fail because access to the grpc-ifc repository is needed
+    # TODO: Incorporate access to the grpc-ifc pipeline for future CI test runs
+    branches: [ not-main ]
 
 jobs:
   build:
