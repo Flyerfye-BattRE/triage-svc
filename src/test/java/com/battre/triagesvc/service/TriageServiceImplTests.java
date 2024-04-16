@@ -25,7 +25,7 @@ class TriageServiceImplTests {
 
         TriageSvcEmptyRequest request = TriageSvcEmptyRequest.newBuilder().build();
 
-        triageServiceImpl.callSpecSvcRandBattery(request, responseObserver);
-        verify(triageService).queryRandomBattery();
+        triageServiceImpl.generateIntakeBatteryOrder(request, responseObserver);
+        verify(triageService).generateIntakeBatteryOrder();
     }
 }

@@ -8,7 +8,6 @@ import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @GrpcService
@@ -22,14 +21,14 @@ public class TriageServiceImpl extends TriageSvcGrpc.TriageSvcImplBase {
     }
 
     @Override
-    public void callSpecSvcRandBattery(TriageSvcEmptyRequest request, StreamObserver<TriageSvcEmptyResponse> responseObserver){
-        logger.log(Level.INFO, "callSpecSvcRandBattery invoked");
+    public void generateIntakeBatteryOrder(TriageSvcEmptyRequest request, StreamObserver<TriageSvcEmptyResponse> responseObserver){
+        logger.info("callSpecSvcRandBattery invoked");
 
         Context ctx = Context.current().fork();
         ctx.run(() -> {
             // Can start asynchronous work here that will not
             // be cancelled when method returns
-            triageService.queryRandomBattery();
+            triageService.generateIntakeBatteryOrder();
         });
 
         TriageSvcEmptyResponse myResponse = TriageSvcEmptyResponse.newBuilder()
@@ -38,6 +37,6 @@ public class TriageServiceImpl extends TriageSvcGrpc.TriageSvcImplBase {
         responseObserver.onNext(myResponse);
         responseObserver.onCompleted();
 
-        logger.log(Level.INFO, "callSpecSvcRandBattery finished");
+        logger.info("callSpecSvcRandBattery finished");
     }
 }
