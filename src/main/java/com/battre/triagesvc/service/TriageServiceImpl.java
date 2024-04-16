@@ -3,7 +3,6 @@ package com.battre.triagesvc.service;
 import com.battre.stubs.services.GenerateIntakeBatteryOrderRequest;
 import com.battre.stubs.services.GenerateIntakeBatteryOrderResponse;
 import com.battre.stubs.services.TriageSvcGrpc;
-import io.grpc.Context;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +20,9 @@ public class TriageServiceImpl extends TriageSvcGrpc.TriageSvcImplBase {
     }
 
     @Override
-    public void generateIntakeBatteryOrder(GenerateIntakeBatteryOrderRequest request, StreamObserver<GenerateIntakeBatteryOrderResponse> responseObserver){
+    public void generateIntakeBatteryOrder(GenerateIntakeBatteryOrderRequest request, StreamObserver<GenerateIntakeBatteryOrderResponse> responseObserver) {
         logger.info("generateIntakeBatteryOrder() invoked");
-        
+
         boolean status = triageService.generateIntakeBatteryOrder();
         GenerateIntakeBatteryOrderResponse response = GenerateIntakeBatteryOrderResponse.newBuilder()
                 .setSuccess(status)

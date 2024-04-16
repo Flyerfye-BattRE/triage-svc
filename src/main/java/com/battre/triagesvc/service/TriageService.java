@@ -10,15 +10,14 @@ import com.battre.stubs.services.GetRandomBatteryTypesRequest;
 import com.battre.stubs.services.GetRandomBatteryTypesResponse;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.client.inject.GrpcClient;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,18 +33,18 @@ public class TriageService {
     private OpsSvcGrpc.OpsSvcStub opsSvcClient;
 
     @Autowired
-    public TriageService(){
+    public TriageService() {
         this.random = new Random();
     }
 
     // Used for mocking spec svc client in tests
-    public TriageService(SpecSvcGrpc.SpecSvcStub specSvcClient, OpsSvcGrpc.OpsSvcStub opsSvcClient){
+    public TriageService(SpecSvcGrpc.SpecSvcStub specSvcClient, OpsSvcGrpc.OpsSvcStub opsSvcClient) {
         this.specSvcClient = specSvcClient;
         this.opsSvcClient = opsSvcClient;
         this.random = new Random();
     }
 
-    public boolean generateIntakeBatteryOrder(){
+    public boolean generateIntakeBatteryOrder() {
         //Randomly decide # of battery types to include
         int numBatteryTypes = random.nextInt(3) + 1;
 

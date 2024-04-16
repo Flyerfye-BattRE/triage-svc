@@ -1,9 +1,5 @@
 package com.battre.triagesvc.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-
 import com.battre.stubs.services.BatteryTypeTierPair;
 import com.battre.stubs.services.GetRandomBatteryTypesResponse;
 import com.battre.stubs.services.OpsSvcGrpc;
@@ -19,6 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 
 class TriageServiceTests {
     private static final Logger logger = Logger.getLogger(TriageServiceTests.class.getName());
