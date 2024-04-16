@@ -1,7 +1,7 @@
 package com.battre.triagesvc.service;
 
-import com.battre.stubs.services.TriageSvcEmptyRequest;
-import com.battre.stubs.services.TriageSvcEmptyResponse;
+import com.battre.stubs.services.GenerateIntakeBatteryOrderRequest;
+import com.battre.stubs.services.GenerateIntakeBatteryOrderResponse;
 import io.grpc.stub.StreamObserver;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -14,7 +14,7 @@ class TriageServiceImplTests {
     private TriageService triageService;
 
     @Mock
-    private StreamObserver<TriageSvcEmptyResponse> responseObserver;
+    private StreamObserver<GenerateIntakeBatteryOrderResponse> responseObserver;
 
     private TriageServiceImpl triageServiceImpl;
 
@@ -23,7 +23,7 @@ class TriageServiceImplTests {
         MockitoAnnotations.openMocks(this);
         triageServiceImpl = new TriageServiceImpl(triageService);
 
-        TriageSvcEmptyRequest request = TriageSvcEmptyRequest.newBuilder().build();
+        GenerateIntakeBatteryOrderRequest request = GenerateIntakeBatteryOrderRequest.newBuilder().build();
 
         triageServiceImpl.generateIntakeBatteryOrder(request, responseObserver);
         verify(triageService).generateIntakeBatteryOrder();

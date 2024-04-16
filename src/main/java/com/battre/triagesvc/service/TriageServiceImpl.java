@@ -1,7 +1,7 @@
 package com.battre.triagesvc.service;
 
-import com.battre.stubs.services.TriageSvcEmptyRequest;
-import com.battre.stubs.services.TriageSvcEmptyResponse;
+import com.battre.stubs.services.GenerateIntakeBatteryOrderRequest;
+import com.battre.stubs.services.GenerateIntakeBatteryOrderResponse;
 import com.battre.stubs.services.TriageSvcGrpc;
 import io.grpc.Context;
 import io.grpc.stub.StreamObserver;
@@ -21,22 +21,17 @@ public class TriageServiceImpl extends TriageSvcGrpc.TriageSvcImplBase {
     }
 
     @Override
-    public void generateIntakeBatteryOrder(TriageSvcEmptyRequest request, StreamObserver<TriageSvcEmptyResponse> responseObserver){
-        logger.info("callSpecSvcRandBattery invoked");
-
-        Context ctx = Context.current().fork();
-        ctx.run(() -> {
-            // Can start asynchronous work here that will not
-            // be cancelled when method returns
-            triageService.generateIntakeBatteryOrder();
-        });
-
-        TriageSvcEmptyResponse myResponse = TriageSvcEmptyResponse.newBuilder()
+    public void generateIntakeBatteryOrder(GenerateIntakeBatteryOrderRequest request, StreamObserver<GenerateIntakeBatteryOrderResponse> responseObserver){
+        logger.info("generateIntakeBatteryOrder() invoked");
+        
+        boolean status = triageService.generateIntakeBatteryOrder();
+        GenerateIntakeBatteryOrderResponse response = GenerateIntakeBatteryOrderResponse.newBuilder()
+                .setSuccess(status)
                 .build();
 
-        responseObserver.onNext(myResponse);
+        responseObserver.onNext(response);
         responseObserver.onCompleted();
 
-        logger.info("callSpecSvcRandBattery finished");
+        logger.info("generateIntakeBatteryOrder() finished");
     }
 }

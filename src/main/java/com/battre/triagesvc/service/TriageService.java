@@ -4,8 +4,8 @@ import com.battre.stubs.services.BatteryTypeTierCount;
 import com.battre.stubs.services.BatteryTypeTierPair;
 import com.battre.stubs.services.OpsSvcGrpc;
 import com.battre.stubs.services.SpecSvcGrpc;
-import com.battre.stubs.services.BatteryTypeTierCountRequest;
-import com.battre.stubs.services.OpsSvcEmptyResponse;
+import com.battre.stubs.services.ProcessIntakeBatteryOrderRequest;
+import com.battre.stubs.services.ProcessIntakeBatteryOrderResponse;
 import com.battre.stubs.services.GetRandomBatteryTypesRequest;
 import com.battre.stubs.services.GetRandomBatteryTypesResponse;
 import io.grpc.stub.StreamObserver;
@@ -26,44 +26,53 @@ public class TriageService {
 
     private static final Logger logger = Logger.getLogger(TriageService.class.getName());
 
+    private Random random;
+
     @GrpcClient("specSvc")
     private SpecSvcGrpc.SpecSvcStub specSvcClient;
     @GrpcClient("opsSvc")
     private OpsSvcGrpc.OpsSvcStub opsSvcClient;
 
     @Autowired
-    public TriageService(){}
+    public TriageService(){
+        this.random = new Random();
+    }
 
     // Used for mocking spec svc client in tests
     public TriageService(SpecSvcGrpc.SpecSvcStub specSvcClient, OpsSvcGrpc.OpsSvcStub opsSvcClient){
         this.specSvcClient = specSvcClient;
         this.opsSvcClient = opsSvcClient;
+        this.random = new Random();
     }
 
-    public void generateIntakeBatteryOrder(){
-        Random random = new Random();
-
+    public boolean generateIntakeBatteryOrder(){
         //Randomly decide # of battery types to include
         int numBatteryTypes = random.nextInt(3) + 1;
 
         List<BatteryTypeTierPair> batteryTypeTierInfo = queryRandomBatteryInfo(numBatteryTypes);
 
+        return processOrder(batteryTypeTierInfo);
+    }
+
+    public boolean processOrder(List<BatteryTypeTierPair> batteryTypeTierInfo) {
         List<BatteryTypeTierCount> batteryTypeTierCountInfo =
                 batteryTypeTierInfo.stream()
-                .map(batteryTypeTierEntry -> BatteryTypeTierCount.newBuilder()
-                        .setBatteryType(batteryTypeTierEntry.getBatteryTypeId())
-                        .setBatteryTier(batteryTypeTierEntry.getBatteryTierId())
-                        .setBatteryCount(random.nextInt(2) + 1)
-                        .build())
-                .collect(Collectors.toList());
+                        .map(batteryTypeTierEntry -> BatteryTypeTierCount.newBuilder()
+                                .setBatteryType(batteryTypeTierEntry.getBatteryTypeId())
+                                .setBatteryTier(batteryTypeTierEntry.getBatteryTierId())
+                                .setBatteryCount(random.nextInt(2) + 1)
+                                .build())
+                        .collect(Collectors.toList());
 
-        BatteryTypeTierCountRequest.Builder batteryTypeCountRequestBuilder = BatteryTypeTierCountRequest.newBuilder();
-        batteryTypeCountRequestBuilder.addAllBatteries(batteryTypeTierCountInfo);
+        ProcessIntakeBatteryOrderRequest.Builder processIntakeBatteryOrderRequestBuilder = ProcessIntakeBatteryOrderRequest.newBuilder();
+        processIntakeBatteryOrderRequestBuilder.addAllBatteries(batteryTypeTierCountInfo);
 
-        // Create a StreamObserver to handle the call asynchronously
-        StreamObserver<OpsSvcEmptyResponse> responseObserver = new StreamObserver<>() {
+
+        CompletableFuture<ProcessIntakeBatteryOrderResponse> responseFuture = new CompletableFuture<>();
+        StreamObserver<ProcessIntakeBatteryOrderResponse> responseObserver = new StreamObserver<>() {
             @Override
-            public void onNext(OpsSvcEmptyResponse response) {
+            public void onNext(ProcessIntakeBatteryOrderResponse response) {
+                responseFuture.complete(response);
             }
 
             @Override
@@ -78,7 +87,19 @@ public class TriageService {
             }
         };
 
-        opsSvcClient.processIntakeBatteryOrder(batteryTypeCountRequestBuilder.build(), responseObserver);
+        opsSvcClient.processIntakeBatteryOrder(processIntakeBatteryOrderRequestBuilder.build(), responseObserver);
+
+        boolean result = false;
+        // Wait for the response or 1 sec handle timeout
+        try {
+            // Blocks until the response is available
+            result = responseFuture.get(5, TimeUnit.SECONDS).getSuccess();
+            logger.info("processIntakeBatteryOrder() responseFuture response: " + result);
+        } catch (Exception e) {
+            logger.severe("processIntakeBatteryOrder() responseFuture error: " + e.getMessage());
+        }
+
+        return result;
     }
 
     public List<BatteryTypeTierPair> queryRandomBatteryInfo(int numBatteryTypes) {
@@ -94,7 +115,6 @@ public class TriageService {
 
             @Override
             public void onNext(GetRandomBatteryTypesResponse response) {
-                // Ensures only one response is returned in the stream
                 responseFuture.complete(response);
             }
 
@@ -117,10 +137,10 @@ public class TriageService {
         // Wait for the response or 1 sec handle timeout
         try {
             // Blocks until the response is available
-            batteryTypes = responseFuture.get(5, TimeUnit.SECONDS).getPairsList();
-            logger.info("getRandomBatteryTypes responseFuture response: " + batteryTypes);
+            batteryTypes = responseFuture.get(5, TimeUnit.SECONDS).getBatteriesList();
+            logger.info("getRandomBatteryTypes() responseFuture response: " + batteryTypes);
         } catch (Exception e) {
-            logger.severe("getRandomBatteryTypes responseFuture error: " + e.getMessage());
+            logger.severe("getRandomBatteryTypes() responseFuture error: " + e.getMessage());
         }
 
         return batteryTypes;

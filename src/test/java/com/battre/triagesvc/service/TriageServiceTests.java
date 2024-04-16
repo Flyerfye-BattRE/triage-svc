@@ -47,7 +47,7 @@ class TriageServiceTests {
             StreamObserver<GetRandomBatteryTypesResponse> observer = invocation.getArgument(1);
 
             // Create a response
-            GetRandomBatteryTypesResponse response = GetRandomBatteryTypesResponse.newBuilder().addAllPairs(expectedBatteryTypes).build();
+            GetRandomBatteryTypesResponse response = GetRandomBatteryTypesResponse.newBuilder().addAllBatteries(expectedBatteryTypes).build();
 
             // Pass the response to the StreamObserver
             observer.onNext(response);
