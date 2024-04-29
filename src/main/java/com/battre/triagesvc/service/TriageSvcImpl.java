@@ -10,20 +10,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.logging.Logger;
 
 @GrpcService
-public class TriageServiceImpl extends TriageSvcGrpc.TriageSvcImplBase {
-    private static final Logger logger = Logger.getLogger(TriageServiceImpl.class.getName());
-    private final TriageService triageService;
+public class TriageSvcImpl extends TriageSvcGrpc.TriageSvcImplBase {
+    private static final Logger logger = Logger.getLogger(TriageSvcImpl.class.getName());
+    private final TriageSvc triageSvc;
 
     @Autowired
-    public TriageServiceImpl(TriageService triageService) {
-        this.triageService = triageService;
+    public TriageSvcImpl(TriageSvc triageSvc) {
+        this.triageSvc = triageSvc;
     }
 
     @Override
     public void generateIntakeBatteryOrder(GenerateIntakeBatteryOrderRequest request, StreamObserver<GenerateIntakeBatteryOrderResponse> responseObserver) {
         logger.info("generateIntakeBatteryOrder() invoked");
 
-        boolean status = triageService.generateIntakeBatteryOrder();
+        boolean status = triageSvc.generateIntakeBatteryOrder();
         GenerateIntakeBatteryOrderResponse response = GenerateIntakeBatteryOrderResponse.newBuilder()
                 .setSuccess(status)
                 .build();

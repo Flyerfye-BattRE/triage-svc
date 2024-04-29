@@ -2,12 +2,12 @@ package com.battre.triagesvc.service;
 
 import com.battre.stubs.services.BatteryTypeTierCount;
 import com.battre.stubs.services.BatteryTypeTierPair;
-import com.battre.stubs.services.OpsSvcGrpc;
-import com.battre.stubs.services.SpecSvcGrpc;
-import com.battre.stubs.services.ProcessIntakeBatteryOrderRequest;
-import com.battre.stubs.services.ProcessIntakeBatteryOrderResponse;
 import com.battre.stubs.services.GetRandomBatteryTypesRequest;
 import com.battre.stubs.services.GetRandomBatteryTypesResponse;
+import com.battre.stubs.services.OpsSvcGrpc;
+import com.battre.stubs.services.ProcessIntakeBatteryOrderRequest;
+import com.battre.stubs.services.ProcessIntakeBatteryOrderResponse;
+import com.battre.stubs.services.SpecSvcGrpc;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +21,9 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Service
-public class TriageService {
+public class TriageSvc {
 
-    private static final Logger logger = Logger.getLogger(TriageService.class.getName());
+    private static final Logger logger = Logger.getLogger(TriageSvc.class.getName());
 
     private Random random;
 
@@ -33,12 +33,12 @@ public class TriageService {
     private OpsSvcGrpc.OpsSvcStub opsSvcClient;
 
     @Autowired
-    public TriageService() {
+    public TriageSvc() {
         this.random = new Random();
     }
 
     // Used for mocking spec svc client in tests
-    public TriageService(SpecSvcGrpc.SpecSvcStub specSvcClient, OpsSvcGrpc.OpsSvcStub opsSvcClient) {
+    public TriageSvc(SpecSvcGrpc.SpecSvcStub specSvcClient, OpsSvcGrpc.OpsSvcStub opsSvcClient) {
         this.specSvcClient = specSvcClient;
         this.opsSvcClient = opsSvcClient;
         this.random = new Random();
@@ -50,10 +50,14 @@ public class TriageService {
 
         List<BatteryTypeTierPair> batteryTypeTierInfo = queryRandomBatteryInfo(numBatteryTypes);
 
-        return processOrder(batteryTypeTierInfo);
+        if(!batteryTypeTierInfo.isEmpty()) {
+            return processOrder(batteryTypeTierInfo);
+        } else {
+            return false;
+        }
     }
 
-    public boolean processOrder(List<BatteryTypeTierPair> batteryTypeTierInfo) {
+    private boolean processOrder(List<BatteryTypeTierPair> batteryTypeTierInfo) {
         List<BatteryTypeTierCount> batteryTypeTierCountInfo =
                 batteryTypeTierInfo.stream()
                         .map(batteryTypeTierEntry -> BatteryTypeTierCount.newBuilder()
