@@ -97,7 +97,6 @@ class TriageSvcTests {
         logger.info("TriageSvc errors expected to follow as part of test");
         List<BatteryTypeTierPair> actualResponse = triageSvc.queryRandomBatteryInfo(2);
 
-
         assertNull(actualResponse);
     }
 

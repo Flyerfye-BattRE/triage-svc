@@ -70,7 +70,6 @@ public class TriageSvc {
         ProcessIntakeBatteryOrderRequest.Builder processIntakeBatteryOrderRequestBuilder = ProcessIntakeBatteryOrderRequest.newBuilder();
         processIntakeBatteryOrderRequestBuilder.addAllBatteries(batteryTypeTierCountInfo);
 
-
         CompletableFuture<ProcessIntakeBatteryOrderResponse> responseFuture = new CompletableFuture<>();
         StreamObserver<ProcessIntakeBatteryOrderResponse> responseObserver = new StreamObserver<>() {
             @Override
