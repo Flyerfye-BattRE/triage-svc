@@ -1,15 +1,13 @@
 package com.battre.triagesvc.service;
 
+import com.battre.grpcifc.GrpcMethodInvoker;
 import com.battre.stubs.services.BatteryTypeTierCount;
 import com.battre.stubs.services.BatteryTypeTierPair;
 import com.battre.stubs.services.GetRandomBatteryTypesRequest;
 import com.battre.stubs.services.GetRandomBatteryTypesResponse;
-import com.battre.stubs.services.OpsSvcGrpc;
 import com.battre.stubs.services.ProcessIntakeBatteryOrderRequest;
 import com.battre.stubs.services.ProcessIntakeBatteryOrderResponse;
-import com.battre.stubs.services.SpecSvcGrpc;
 import io.grpc.stub.StreamObserver;
-import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,23 +22,12 @@ import java.util.stream.Collectors;
 public class TriageSvc {
 
     private static final Logger logger = Logger.getLogger(TriageSvc.class.getName());
-
-    private Random random;
-
-    @GrpcClient("specSvc")
-    private SpecSvcGrpc.SpecSvcStub specSvcClient;
-    @GrpcClient("opsSvc")
-    private OpsSvcGrpc.OpsSvcStub opsSvcClient;
+    private final GrpcMethodInvoker grpcMethodInvoker;
+    private final Random random;
 
     @Autowired
-    public TriageSvc() {
-        this.random = new Random();
-    }
-
-    // Used for mocking spec svc client in tests
-    public TriageSvc(SpecSvcGrpc.SpecSvcStub specSvcClient, OpsSvcGrpc.OpsSvcStub opsSvcClient) {
-        this.specSvcClient = specSvcClient;
-        this.opsSvcClient = opsSvcClient;
+    public TriageSvc(GrpcMethodInvoker grpcMethodInvoker) {
+        this.grpcMethodInvoker = grpcMethodInvoker;
         this.random = new Random();
     }
 
@@ -50,7 +37,7 @@ public class TriageSvc {
 
         List<BatteryTypeTierPair> batteryTypeTierInfo = queryRandomBatteryInfo(numBatteryTypes);
 
-        if(!batteryTypeTierInfo.isEmpty()) {
+        if (!batteryTypeTierInfo.isEmpty()) {
             return processOrder(batteryTypeTierInfo);
         } else {
             return false;
@@ -67,8 +54,9 @@ public class TriageSvc {
                                 .build())
                         .collect(Collectors.toList());
 
-        ProcessIntakeBatteryOrderRequest.Builder processIntakeBatteryOrderRequestBuilder = ProcessIntakeBatteryOrderRequest.newBuilder();
-        processIntakeBatteryOrderRequestBuilder.addAllBatteries(batteryTypeTierCountInfo);
+        ProcessIntakeBatteryOrderRequest request = ProcessIntakeBatteryOrderRequest.newBuilder()
+                .addAllBatteries(batteryTypeTierCountInfo)
+                .build();
 
         CompletableFuture<ProcessIntakeBatteryOrderResponse> responseFuture = new CompletableFuture<>();
         StreamObserver<ProcessIntakeBatteryOrderResponse> responseObserver = new StreamObserver<>() {
@@ -89,7 +77,12 @@ public class TriageSvc {
             }
         };
 
-        opsSvcClient.processIntakeBatteryOrder(processIntakeBatteryOrderRequestBuilder.build(), responseObserver);
+        grpcMethodInvoker.callMethod(
+                "opssvc",
+                "processIntakeBatteryOrder",
+                request,
+                responseObserver
+        );
 
         boolean result = false;
         // Wait for the response or 1 sec handle timeout
@@ -105,8 +98,7 @@ public class TriageSvc {
     }
 
     public List<BatteryTypeTierPair> queryRandomBatteryInfo(int numBatteryTypes) {
-        GetRandomBatteryTypesRequest request = GetRandomBatteryTypesRequest
-                .newBuilder()
+        GetRandomBatteryTypesRequest request = GetRandomBatteryTypesRequest.newBuilder()
                 .setNumBatteryTypes(numBatteryTypes)
                 .build();
 
@@ -133,7 +125,7 @@ public class TriageSvc {
             }
         };
 
-        specSvcClient.getRandomBatteryTypes(request, responseObserver);
+        grpcMethodInvoker.callMethod("specsvc", "getRandomBatteryTypes", request, responseObserver);
 
         List<BatteryTypeTierPair> batteryTypes = null;
         // Wait for the response or 1 sec handle timeout

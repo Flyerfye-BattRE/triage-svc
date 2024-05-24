@@ -8,5 +8,4 @@ class TriagesvcApplicationTests {
     @Test
     void contextLoads() {
     }
-
 }

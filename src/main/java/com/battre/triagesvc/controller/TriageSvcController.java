@@ -1,8 +1,9 @@
-package com.battre.triagesvc.service;
+package com.battre.triagesvc.controller;
 
 import com.battre.stubs.services.GenerateIntakeBatteryOrderRequest;
 import com.battre.stubs.services.GenerateIntakeBatteryOrderResponse;
 import com.battre.stubs.services.TriageSvcGrpc;
+import com.battre.triagesvc.service.TriageSvc;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,12 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.logging.Logger;
 
 @GrpcService
-public class TriageSvcImpl extends TriageSvcGrpc.TriageSvcImplBase {
-    private static final Logger logger = Logger.getLogger(TriageSvcImpl.class.getName());
+public class TriageSvcController extends TriageSvcGrpc.TriageSvcImplBase {
+    private static final Logger logger = Logger.getLogger(TriageSvcController.class.getName());
     private final TriageSvc triageSvc;
 
     @Autowired
-    public TriageSvcImpl(TriageSvc triageSvc) {
+    public TriageSvcController(TriageSvc triageSvc) {
         this.triageSvc = triageSvc;
     }
 

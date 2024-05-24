@@ -2,6 +2,7 @@ package com.battre.triagesvc.service;
 
 import com.battre.stubs.services.GenerateIntakeBatteryOrderRequest;
 import com.battre.stubs.services.GenerateIntakeBatteryOrderResponse;
+import com.battre.triagesvc.controller.TriageSvcController;
 import io.grpc.stub.StreamObserver;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +13,7 @@ import org.mockito.MockitoAnnotations;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class TriageSvcImplTests {
+class TriageSvcControllerTests {
 
     @Mock
     private TriageSvc triageSvc;
@@ -20,14 +21,14 @@ class TriageSvcImplTests {
     @Mock
     private StreamObserver<GenerateIntakeBatteryOrderResponse> responseGenerateIntakeBatteryOrderResponse;
 
-    private TriageSvcImpl triageSvcImpl;
+    private TriageSvcController triageSvcController;
 
     private AutoCloseable closeable;
 
     @BeforeEach
     public void openMocks() {
         closeable = MockitoAnnotations.openMocks(this);
-        triageSvcImpl = new TriageSvcImpl(triageSvc);
+        triageSvcController = new TriageSvcController(triageSvc);
     }
 
     @AfterEach
@@ -40,7 +41,7 @@ class TriageSvcImplTests {
         when(triageSvc.generateIntakeBatteryOrder()).thenReturn(true);
         GenerateIntakeBatteryOrderRequest request = GenerateIntakeBatteryOrderRequest.newBuilder().build();
 
-        triageSvcImpl.generateIntakeBatteryOrder(request, responseGenerateIntakeBatteryOrderResponse);
+        triageSvcController.generateIntakeBatteryOrder(request, responseGenerateIntakeBatteryOrderResponse);
         verify(triageSvc).generateIntakeBatteryOrder();
         verify(responseGenerateIntakeBatteryOrderResponse).onNext(GenerateIntakeBatteryOrderResponse.newBuilder().setSuccess(true).build());
         verify(responseGenerateIntakeBatteryOrderResponse).onCompleted();
@@ -51,7 +52,7 @@ class TriageSvcImplTests {
         when(triageSvc.generateIntakeBatteryOrder()).thenReturn(false);
         GenerateIntakeBatteryOrderRequest request = GenerateIntakeBatteryOrderRequest.newBuilder().build();
 
-        triageSvcImpl.generateIntakeBatteryOrder(request, responseGenerateIntakeBatteryOrderResponse);
+        triageSvcController.generateIntakeBatteryOrder(request, responseGenerateIntakeBatteryOrderResponse);
         verify(triageSvc).generateIntakeBatteryOrder();
         verify(responseGenerateIntakeBatteryOrderResponse).onNext(GenerateIntakeBatteryOrderResponse.newBuilder().setSuccess(false).build());
         verify(responseGenerateIntakeBatteryOrderResponse).onCompleted();
