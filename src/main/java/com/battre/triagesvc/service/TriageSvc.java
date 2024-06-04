@@ -69,6 +69,7 @@ public class TriageSvc {
             public void onError(Throwable t) {
                 // Handle any errors
                 logger.severe("processIntakeBatteryOrder() errored: " + t.getMessage());
+                responseFuture.completeExceptionally(t);
             }
 
             @Override
@@ -116,6 +117,7 @@ public class TriageSvc {
             public void onError(Throwable t) {
                 // Handle any errors
                 logger.severe("getRandomBatteryTypes() errored: " + t.getMessage());
+                responseFuture.completeExceptionally(t);
             }
 
             @Override
