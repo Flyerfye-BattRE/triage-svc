@@ -58,44 +58,13 @@ public class TriageSvc {
                 .addAllBatteries(batteryTypeTierCountInfo)
                 .build();
 
-        CompletableFuture<ProcessIntakeBatteryOrderResponse> responseFuture = new CompletableFuture<>();
-        StreamObserver<ProcessIntakeBatteryOrderResponse> responseObserver = new StreamObserver<>() {
-            @Override
-            public void onNext(ProcessIntakeBatteryOrderResponse response) {
-                responseFuture.complete(response);
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                // Handle any errors
-                logger.severe("processIntakeBatteryOrder() errored: " + t.getMessage());
-                responseFuture.completeExceptionally(t);
-            }
-
-            @Override
-            public void onCompleted() {
-                logger.info("processIntakeBatteryOrder() completed");
-            }
-        };
-
-        grpcMethodInvoker.callMethod(
+        ProcessIntakeBatteryOrderResponse response = grpcMethodInvoker.invokeNonblock(
                 "opssvc",
                 "processIntakeBatteryOrder",
-                request,
-                responseObserver
+                request
         );
 
-        boolean result = false;
-        // Wait for the response or 1 sec handle timeout
-        try {
-            // Blocks until the response is available
-            result = responseFuture.get(5, TimeUnit.SECONDS).getSuccess();
-            logger.info("processIntakeBatteryOrder() responseFuture response: " + result);
-        } catch (Exception e) {
-            logger.severe("processIntakeBatteryOrder() responseFuture error: " + e.getMessage());
-        }
-
-        return result;
+        return response.getSuccess();
     }
 
     public List<BatteryTypeTierPair> queryRandomBatteryInfo(int numBatteryTypes) {
@@ -103,42 +72,9 @@ public class TriageSvc {
                 .setNumBatteryTypes(numBatteryTypes)
                 .build();
 
-        CompletableFuture<GetRandomBatteryTypesResponse> responseFuture = new CompletableFuture<>();
+        GetRandomBatteryTypesResponse response =
+                grpcMethodInvoker.invokeNonblock("specsvc", "getRandomBatteryTypes", request);
 
-        // Create a StreamObserver to handle the response asynchronously
-        StreamObserver<GetRandomBatteryTypesResponse> responseObserver = new StreamObserver<>() {
-
-            @Override
-            public void onNext(GetRandomBatteryTypesResponse response) {
-                responseFuture.complete(response);
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                // Handle any errors
-                logger.severe("getRandomBatteryTypes() errored: " + t.getMessage());
-                responseFuture.completeExceptionally(t);
-            }
-
-            @Override
-            public void onCompleted() {
-                // Handle the completion
-                logger.info("getRandomBatteryTypes() completed");
-            }
-        };
-
-        grpcMethodInvoker.callMethod("specsvc", "getRandomBatteryTypes", request, responseObserver);
-
-        List<BatteryTypeTierPair> batteryTypes = null;
-        // Wait for the response or 1 sec handle timeout
-        try {
-            // Blocks until the response is available
-            batteryTypes = responseFuture.get(5, TimeUnit.SECONDS).getBatteriesList();
-            logger.info("getRandomBatteryTypes() responseFuture response: " + batteryTypes);
-        } catch (Exception e) {
-            logger.severe("getRandomBatteryTypes() responseFuture error: " + e.getMessage());
-        }
-
-        return batteryTypes;
+        return response.getBatteriesList();
     }
 }

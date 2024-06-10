@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
 
 class TriageSvcTests {
     private static final Logger logger = Logger.getLogger(TriageSvcTests.class.getName());
@@ -38,31 +38,19 @@ class TriageSvcTests {
     private AutoCloseable closeable;
 
     public void mockGetRandomBatteryTypes(GetRandomBatteryTypesResponse response) {
-        doAnswer(invocation -> {
-            StreamObserver<GetRandomBatteryTypesResponse> observer = invocation.getArgument(3);
-            observer.onNext(response);
-            observer.onCompleted();
-            return null;
-        }).when(grpcMethodInvoker).callMethod(
+        when(grpcMethodInvoker.invokeNonblock(
                 eq("specsvc"),
                 eq("getRandomBatteryTypes"),
-                any(GetRandomBatteryTypesRequest.class),
-                any(StreamObserver.class)
-        );
+                any(GetRandomBatteryTypesRequest.class)
+        )).thenReturn(response);
     }
 
     public void mockProcessIntakeBatteryOrder(ProcessIntakeBatteryOrderResponse response) {
-        doAnswer(invocation -> {
-            StreamObserver<ProcessIntakeBatteryOrderResponse> observer = invocation.getArgument(3);
-            observer.onNext(response);
-            observer.onCompleted();
-            return null;
-        }).when(grpcMethodInvoker).callMethod(
+        when(grpcMethodInvoker.invokeNonblock(
                 eq("opssvc"),
                 eq("processIntakeBatteryOrder"),
-                any(ProcessIntakeBatteryOrderRequest.class),
-                any(StreamObserver.class)
-        );
+                any(ProcessIntakeBatteryOrderRequest.class)
+        )).thenReturn(response);
     }
 
     @BeforeEach
@@ -89,47 +77,6 @@ class TriageSvcTests {
         List<BatteryTypeTierPair> actualResponse = triageSvc.queryRandomBatteryInfo(2);
 
         assertEquals(expectedBatteryTypes, actualResponse);
-    }
-
-    @Test
-    void testQueryRandomBattery_Error() {
-        CompletableFuture<GetRandomBatteryTypesResponse> responseFuture = new CompletableFuture<>();
-
-        doAnswer((Answer<Void>) invocation -> {
-            StreamObserver<GetRandomBatteryTypesResponse> observer = invocation.getArgument(3);
-            observer.onError(new RuntimeException("Test Error"));
-            responseFuture.completeExceptionally(new RuntimeException("Test Error"));
-            return null;
-        }).when(grpcMethodInvoker).callMethod(
-                eq("specsvc"),
-                eq("getRandomBatteryTypes"),
-                any(),
-                any()
-        );
-
-        logger.info("TriageSvc errors expected to follow as part of test");
-        List<BatteryTypeTierPair> actualResponse = triageSvc.queryRandomBatteryInfo(2);
-
-        assertNull(actualResponse);
-    }
-
-    @Test
-    void testQueryRandomBattery_Timeout() {
-        doAnswer((Answer<Void>) invocation -> {
-            StreamObserver<GetRandomBatteryTypesResponse> observer = invocation.getArgument(3);
-            // No response will be sent, simulating timeout
-            return null;
-        }).when(grpcMethodInvoker).callMethod(
-                eq("specsvc"),
-                eq("getRandomBatteryTypes"),
-                any(),
-                any()
-        );
-
-        logger.info("TriageSvc errors expected to follow as part of test");
-        List<BatteryTypeTierPair> actualResponse = triageSvc.queryRandomBatteryInfo(2);
-
-        assertNull(actualResponse);
     }
 
     @Test
