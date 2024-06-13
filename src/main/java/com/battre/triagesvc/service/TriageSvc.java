@@ -7,6 +7,7 @@ import com.battre.stubs.services.GetRandomBatteryTypesRequest;
 import com.battre.stubs.services.GetRandomBatteryTypesResponse;
 import com.battre.stubs.services.ProcessIntakeBatteryOrderRequest;
 import com.battre.stubs.services.ProcessIntakeBatteryOrderResponse;
+import com.battre.triagesvc.enums.GenerateOrderStatusEnum;
 import io.grpc.stub.StreamObserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ public class TriageSvc {
         this.random = new Random();
     }
 
-    public boolean generateIntakeBatteryOrder() {
+    public GenerateOrderStatusEnum generateIntakeBatteryOrder() {
         //Randomly decide # of battery types to include
         int numBatteryTypes = random.nextInt(3) + 1;
 
@@ -40,11 +41,11 @@ public class TriageSvc {
         if (!batteryTypeTierInfo.isEmpty()) {
             return processOrder(batteryTypeTierInfo);
         } else {
-            return false;
+            return GenerateOrderStatusEnum.SPECSVC_GENBATTERIES_ERR;
         }
     }
 
-    private boolean processOrder(List<BatteryTypeTierPair> batteryTypeTierInfo) {
+    private GenerateOrderStatusEnum processOrder(List<BatteryTypeTierPair> batteryTypeTierInfo) {
         List<BatteryTypeTierCount> batteryTypeTierCountInfo =
                 batteryTypeTierInfo.stream()
                         .map(batteryTypeTierEntry -> BatteryTypeTierCount.newBuilder()
@@ -64,7 +65,9 @@ public class TriageSvc {
                 request
         );
 
-        return response.getSuccess();
+        return response.getSuccess() ?
+                GenerateOrderStatusEnum.SUCCESS :
+                GenerateOrderStatusEnum.fromStatusDescription(response.getStatus().toString());
     }
 
     public List<BatteryTypeTierPair> queryRandomBatteryInfo(int numBatteryTypes) {

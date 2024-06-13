@@ -6,6 +6,7 @@ import com.battre.stubs.services.GetRandomBatteryTypesRequest;
 import com.battre.stubs.services.GetRandomBatteryTypesResponse;
 import com.battre.stubs.services.ProcessIntakeBatteryOrderRequest;
 import com.battre.stubs.services.ProcessIntakeBatteryOrderResponse;
+import com.battre.triagesvc.enums.GenerateOrderStatusEnum;
 import io.grpc.stub.StreamObserver;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +22,7 @@ import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -93,9 +95,9 @@ class TriageSvcTests {
                 ProcessIntakeBatteryOrderResponse.newBuilder().setSuccess(true).build();
         mockProcessIntakeBatteryOrder(expectedOpsSvcResponse);
 
-        boolean actualResponse = triageSvc.generateIntakeBatteryOrder();
+        GenerateOrderStatusEnum actualResponse = triageSvc.generateIntakeBatteryOrder();
 
-        assertTrue(actualResponse);
+        assertEquals(actualResponse, GenerateOrderStatusEnum.SUCCESS);
     }
 
     @Test
@@ -112,8 +114,8 @@ class TriageSvcTests {
                 ProcessIntakeBatteryOrderResponse.newBuilder().setSuccess(false).build();
         mockProcessIntakeBatteryOrder(expectedOpsSvcResponse);
 
-        boolean actualResponse = triageSvc.generateIntakeBatteryOrder();
+        GenerateOrderStatusEnum actualResponse = triageSvc.generateIntakeBatteryOrder();
 
-        assertFalse(actualResponse);
+        assertNotEquals(actualResponse, GenerateOrderStatusEnum.SUCCESS);
     }
 }

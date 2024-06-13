@@ -3,6 +3,7 @@ package com.battre.triagesvc.controller;
 import com.battre.stubs.services.GenerateIntakeBatteryOrderRequest;
 import com.battre.stubs.services.GenerateIntakeBatteryOrderResponse;
 import com.battre.stubs.services.TriageSvcGrpc;
+import com.battre.triagesvc.enums.GenerateOrderStatusEnum;
 import com.battre.triagesvc.service.TriageSvc;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
@@ -24,9 +25,10 @@ public class TriageSvcController extends TriageSvcGrpc.TriageSvcImplBase {
     public void generateIntakeBatteryOrder(GenerateIntakeBatteryOrderRequest request, StreamObserver<GenerateIntakeBatteryOrderResponse> responseObserver) {
         logger.info("generateIntakeBatteryOrder() invoked");
 
-        boolean status = triageSvc.generateIntakeBatteryOrder();
+        GenerateOrderStatusEnum status = triageSvc.generateIntakeBatteryOrder();
         GenerateIntakeBatteryOrderResponse response = GenerateIntakeBatteryOrderResponse.newBuilder()
-                .setSuccess(status)
+                .setSuccess(status == GenerateOrderStatusEnum.SUCCESS ? true : false)
+                .setStatus(status.getgrpcStatus())
                 .build();
 
         responseObserver.onNext(response);
