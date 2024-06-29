@@ -1,0 +1,13 @@
+#  To run: docker-compose -f docker-compose.local.yml up --build
+version: '3'
+
+services:
+  triagesvc:
+    build:
+      context: .
+      dockerfile: DockerfileLocal
+    ports:
+      - "50010:50010"
+      - "50015:50015"
+    env_file:
+      - .env

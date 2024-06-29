@@ -65,6 +65,10 @@ public class TriageSvc {
                 request
         );
 
+        if(response == null) {
+            return GenerateOrderStatusEnum.UNKNOWN_ERR;
+        }
+
         return response.getSuccess() ?
                 GenerateOrderStatusEnum.SUCCESS :
                 GenerateOrderStatusEnum.fromStatusDescription(response.getStatus().toString());
