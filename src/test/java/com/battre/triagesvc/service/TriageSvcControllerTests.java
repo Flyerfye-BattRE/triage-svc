@@ -1,5 +1,8 @@
 package com.battre.triagesvc.service;
 
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.battre.stubs.services.GenerateIntakeBatteryOrderRequest;
 import com.battre.stubs.services.GenerateIntakeBatteryOrderResponse;
 import com.battre.stubs.services.GenerateOrderStatus;
@@ -11,9 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 class TriageSvcControllerTests {
 

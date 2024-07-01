@@ -8,16 +8,12 @@ import com.battre.stubs.services.GetRandomBatteryTypesResponse;
 import com.battre.stubs.services.ProcessIntakeBatteryOrderRequest;
 import com.battre.stubs.services.ProcessIntakeBatteryOrderResponse;
 import com.battre.triagesvc.enums.GenerateOrderStatusEnum;
-import io.grpc.stub.StreamObserver;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class TriageSvc {
@@ -65,7 +61,7 @@ public class TriageSvc {
                 request
         );
 
-        if(response == null) {
+        if (response == null) {
             return GenerateOrderStatusEnum.UNKNOWN_ERR;
         }
 
