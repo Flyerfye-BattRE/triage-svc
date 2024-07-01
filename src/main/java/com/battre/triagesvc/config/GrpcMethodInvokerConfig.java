@@ -5,7 +5,6 @@ import com.battre.grpcifc.GrpcMethodInvoker;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import software.amazon.awssdk.services.servicediscovery.ServiceDiscoveryClient;
 import software.amazon.awssdk.services.servicediscovery.model.DiscoverInstancesRequest;
 import software.amazon.awssdk.services.servicediscovery.model.DiscoverInstancesResponse;
@@ -15,7 +14,6 @@ import java.util.logging.Logger;
 
 /** Configures the grpc method invoker to be able to use AWS CloudMap for service discovery */
 @Configuration
-@Profile({"dev", "prod"})
 public class GrpcMethodInvokerConfig {
   private static final Logger logger = Logger.getLogger(GrpcMethodInvokerConfig.class.getName());
 
