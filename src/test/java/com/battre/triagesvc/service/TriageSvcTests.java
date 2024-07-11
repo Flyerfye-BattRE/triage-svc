@@ -23,92 +23,95 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 class TriageSvcTests {
-    private static final Logger logger = Logger.getLogger(TriageSvcTests.class.getName());
+  private static final Logger logger = Logger.getLogger(TriageSvcTests.class.getName());
 
-    @Mock
-    private GrpcMethodInvoker grpcMethodInvoker;
+  @Mock private GrpcMethodInvoker grpcMethodInvoker;
 
-    private TriageSvc triageSvc;
+  private TriageSvc triageSvc;
 
-    private AutoCloseable closeable;
+  private AutoCloseable closeable;
 
-    public void mockGetRandomBatteryTypes(GetRandomBatteryTypesResponse response) {
-        when(grpcMethodInvoker.invokeNonblock(
-                eq("specsvc"),
-                eq("getRandomBatteryTypes"),
-                any(GetRandomBatteryTypesRequest.class)
-        )).thenReturn(response);
-    }
+  public void mockGetRandomBatteryTypes(GetRandomBatteryTypesResponse response) {
+    when(grpcMethodInvoker.invokeNonblock(
+            eq("specsvc"), eq("getRandomBatteryTypes"), any(GetRandomBatteryTypesRequest.class)))
+        .thenReturn(response);
+  }
 
-    public void mockProcessIntakeBatteryOrder(ProcessIntakeBatteryOrderResponse response) {
-        when(grpcMethodInvoker.invokeNonblock(
-                eq("opssvc"),
-                eq("processIntakeBatteryOrder"),
-                any(ProcessIntakeBatteryOrderRequest.class)
-        )).thenReturn(response);
-    }
+  public void mockProcessIntakeBatteryOrder(ProcessIntakeBatteryOrderResponse response) {
+    when(grpcMethodInvoker.invokeNonblock(
+            eq("opssvc"),
+            eq("processIntakeBatteryOrder"),
+            any(ProcessIntakeBatteryOrderRequest.class)))
+        .thenReturn(response);
+  }
 
-    @BeforeEach
-    public void openMocks() {
-        closeable = MockitoAnnotations.openMocks(this);
-        triageSvc = new TriageSvc(grpcMethodInvoker);
-    }
+  @BeforeEach
+  public void openMocks() {
+    closeable = MockitoAnnotations.openMocks(this);
+    triageSvc = new TriageSvc(grpcMethodInvoker);
+  }
 
-    @AfterEach
-    public void releaseMocks() throws Exception {
-        closeable.close();
-    }
+  @AfterEach
+  public void releaseMocks() throws Exception {
+    closeable.close();
+  }
 
-    @Test
-    void testQueryRandomBattery_Success() {
-        List<BatteryTypeTierPair> expectedBatteryTypes = new ArrayList<>();
-        expectedBatteryTypes.add(BatteryTypeTierPair.newBuilder().setBatteryTypeId(5).setBatteryTierId(3).build());
-        expectedBatteryTypes.add(BatteryTypeTierPair.newBuilder().setBatteryTypeId(2).setBatteryTierId(1).build());
+  @Test
+  void testQueryRandomBattery_Success() {
+    List<BatteryTypeTierPair> expectedBatteryTypes = new ArrayList<>();
+    expectedBatteryTypes.add(
+        BatteryTypeTierPair.newBuilder().setBatteryTypeId(5).setBatteryTierId(3).build());
+    expectedBatteryTypes.add(
+        BatteryTypeTierPair.newBuilder().setBatteryTypeId(2).setBatteryTierId(1).build());
 
-        GetRandomBatteryTypesResponse expectedSpecSvcResponse =
-                GetRandomBatteryTypesResponse.newBuilder().addAllBatteries(expectedBatteryTypes).build();
-        mockGetRandomBatteryTypes(expectedSpecSvcResponse);
+    GetRandomBatteryTypesResponse expectedSpecSvcResponse =
+        GetRandomBatteryTypesResponse.newBuilder().addAllBatteries(expectedBatteryTypes).build();
+    mockGetRandomBatteryTypes(expectedSpecSvcResponse);
 
-        List<BatteryTypeTierPair> actualResponse = triageSvc.queryRandomBatteryInfo(2);
+    List<BatteryTypeTierPair> actualResponse = triageSvc.queryRandomBatteryInfo(2);
 
-        assertEquals(expectedBatteryTypes, actualResponse);
-    }
+    assertEquals(expectedBatteryTypes, actualResponse);
+  }
 
-    @Test
-    void testGenerateIntakeBatteryOrder_Success() {
-        List<BatteryTypeTierPair> expectedBatteryTypes = new ArrayList<>();
-        expectedBatteryTypes.add(BatteryTypeTierPair.newBuilder().setBatteryTypeId(5).setBatteryTierId(3).build());
-        expectedBatteryTypes.add(BatteryTypeTierPair.newBuilder().setBatteryTypeId(2).setBatteryTierId(1).build());
+  @Test
+  void testGenerateIntakeBatteryOrder_Success() {
+    List<BatteryTypeTierPair> expectedBatteryTypes = new ArrayList<>();
+    expectedBatteryTypes.add(
+        BatteryTypeTierPair.newBuilder().setBatteryTypeId(5).setBatteryTierId(3).build());
+    expectedBatteryTypes.add(
+        BatteryTypeTierPair.newBuilder().setBatteryTypeId(2).setBatteryTierId(1).build());
 
-        GetRandomBatteryTypesResponse expectedSpecSvcResponse =
-                GetRandomBatteryTypesResponse.newBuilder().addAllBatteries(expectedBatteryTypes).build();
-        mockGetRandomBatteryTypes(expectedSpecSvcResponse);
+    GetRandomBatteryTypesResponse expectedSpecSvcResponse =
+        GetRandomBatteryTypesResponse.newBuilder().addAllBatteries(expectedBatteryTypes).build();
+    mockGetRandomBatteryTypes(expectedSpecSvcResponse);
 
-        ProcessIntakeBatteryOrderResponse expectedOpsSvcResponse =
-                ProcessIntakeBatteryOrderResponse.newBuilder().setSuccess(true).build();
-        mockProcessIntakeBatteryOrder(expectedOpsSvcResponse);
+    ProcessIntakeBatteryOrderResponse expectedOpsSvcResponse =
+        ProcessIntakeBatteryOrderResponse.newBuilder().setSuccess(true).build();
+    mockProcessIntakeBatteryOrder(expectedOpsSvcResponse);
 
-        GenerateOrderStatusEnum actualResponse = triageSvc.generateIntakeBatteryOrder();
+    GenerateOrderStatusEnum actualResponse = triageSvc.generateIntakeBatteryOrder();
 
-        assertEquals(actualResponse, GenerateOrderStatusEnum.SUCCESS);
-    }
+    assertEquals(actualResponse, GenerateOrderStatusEnum.SUCCESS);
+  }
 
-    @Test
-    void testGenerateIntakeBatteryOrder_Fail() {
-        List<BatteryTypeTierPair> expectedBatteryTypes = new ArrayList<>();
-        expectedBatteryTypes.add(BatteryTypeTierPair.newBuilder().setBatteryTypeId(5).setBatteryTierId(3).build());
-        expectedBatteryTypes.add(BatteryTypeTierPair.newBuilder().setBatteryTypeId(2).setBatteryTierId(1).build());
+  @Test
+  void testGenerateIntakeBatteryOrder_Fail() {
+    List<BatteryTypeTierPair> expectedBatteryTypes = new ArrayList<>();
+    expectedBatteryTypes.add(
+        BatteryTypeTierPair.newBuilder().setBatteryTypeId(5).setBatteryTierId(3).build());
+    expectedBatteryTypes.add(
+        BatteryTypeTierPair.newBuilder().setBatteryTypeId(2).setBatteryTierId(1).build());
 
-        GetRandomBatteryTypesResponse expectedSpecSvcResponse =
-                GetRandomBatteryTypesResponse.newBuilder().addAllBatteries(expectedBatteryTypes).build();
-        mockGetRandomBatteryTypes(expectedSpecSvcResponse);
+    GetRandomBatteryTypesResponse expectedSpecSvcResponse =
+        GetRandomBatteryTypesResponse.newBuilder().addAllBatteries(expectedBatteryTypes).build();
+    mockGetRandomBatteryTypes(expectedSpecSvcResponse);
 
-        ProcessIntakeBatteryOrderResponse expectedOpsSvcResponse =
-                ProcessIntakeBatteryOrderResponse.newBuilder().setSuccess(false).build();
-        mockProcessIntakeBatteryOrder(expectedOpsSvcResponse);
+    ProcessIntakeBatteryOrderResponse expectedOpsSvcResponse =
+        ProcessIntakeBatteryOrderResponse.newBuilder().setSuccess(false).build();
+    mockProcessIntakeBatteryOrder(expectedOpsSvcResponse);
 
-        GenerateOrderStatusEnum actualResponse = triageSvc.generateIntakeBatteryOrder();
+    GenerateOrderStatusEnum actualResponse = triageSvc.generateIntakeBatteryOrder();
 
-        assertNotEquals(actualResponse, GenerateOrderStatusEnum.SUCCESS);
-    }
+    assertNotEquals(actualResponse, GenerateOrderStatusEnum.SUCCESS);
+  }
 }

@@ -17,46 +17,61 @@ import org.mockito.MockitoAnnotations;
 
 class TriageSvcControllerTests {
 
-    @Mock
-    private TriageSvc triageSvc;
+  @Mock private TriageSvc triageSvc;
 
-    @Mock
-    private StreamObserver<GenerateIntakeBatteryOrderResponse> responseGenerateIntakeBatteryOrderResponse;
+  @Mock
+  private StreamObserver<GenerateIntakeBatteryOrderResponse>
+      responseGenerateIntakeBatteryOrderResponse;
 
-    private TriageSvcController triageSvcController;
+  private TriageSvcController triageSvcController;
 
-    private AutoCloseable closeable;
+  private AutoCloseable closeable;
 
-    @BeforeEach
-    public void openMocks() {
-        closeable = MockitoAnnotations.openMocks(this);
-        triageSvcController = new TriageSvcController(triageSvc);
-    }
+  @BeforeEach
+  public void openMocks() {
+    closeable = MockitoAnnotations.openMocks(this);
+    triageSvcController = new TriageSvcController(triageSvc);
+  }
 
-    @AfterEach
-    public void releaseMocks() throws Exception {
-        closeable.close();
-    }
+  @AfterEach
+  public void releaseMocks() throws Exception {
+    closeable.close();
+  }
 
-    @Test
-    void testCallSpecSvcRandBatterySuccess() {
-        when(triageSvc.generateIntakeBatteryOrder()).thenReturn(GenerateOrderStatusEnum.SUCCESS);
-        GenerateIntakeBatteryOrderRequest request = GenerateIntakeBatteryOrderRequest.newBuilder().build();
+  @Test
+  void testCallSpecSvcRandBatterySuccess() {
+    when(triageSvc.generateIntakeBatteryOrder()).thenReturn(GenerateOrderStatusEnum.SUCCESS);
+    GenerateIntakeBatteryOrderRequest request =
+        GenerateIntakeBatteryOrderRequest.newBuilder().build();
 
-        triageSvcController.generateIntakeBatteryOrder(request, responseGenerateIntakeBatteryOrderResponse);
-        verify(triageSvc).generateIntakeBatteryOrder();
-        verify(responseGenerateIntakeBatteryOrderResponse).onNext(GenerateIntakeBatteryOrderResponse.newBuilder().setSuccess(true).setStatus(GenerateOrderStatus.SUCCESS).build());
-        verify(responseGenerateIntakeBatteryOrderResponse).onCompleted();
-    }
+    triageSvcController.generateIntakeBatteryOrder(
+        request, responseGenerateIntakeBatteryOrderResponse);
+    verify(triageSvc).generateIntakeBatteryOrder();
+    verify(responseGenerateIntakeBatteryOrderResponse)
+        .onNext(
+            GenerateIntakeBatteryOrderResponse.newBuilder()
+                .setSuccess(true)
+                .setStatus(GenerateOrderStatus.SUCCESS)
+                .build());
+    verify(responseGenerateIntakeBatteryOrderResponse).onCompleted();
+  }
 
-    @Test
-    void testCallSpecSvcRandBatteryFail() {
-        when(triageSvc.generateIntakeBatteryOrder()).thenReturn(GenerateOrderStatusEnum.SPECSVC_GENBATTERIES_ERR);
-        GenerateIntakeBatteryOrderRequest request = GenerateIntakeBatteryOrderRequest.newBuilder().build();
+  @Test
+  void testCallSpecSvcRandBatteryFail() {
+    when(triageSvc.generateIntakeBatteryOrder())
+        .thenReturn(GenerateOrderStatusEnum.SPECSVC_GENBATTERIES_ERR);
+    GenerateIntakeBatteryOrderRequest request =
+        GenerateIntakeBatteryOrderRequest.newBuilder().build();
 
-        triageSvcController.generateIntakeBatteryOrder(request, responseGenerateIntakeBatteryOrderResponse);
-        verify(triageSvc).generateIntakeBatteryOrder();
-        verify(responseGenerateIntakeBatteryOrderResponse).onNext(GenerateIntakeBatteryOrderResponse.newBuilder().setSuccess(false).setStatus(GenerateOrderStatus.SPECSVC_GENBATTERIES_ERR).build());
-        verify(responseGenerateIntakeBatteryOrderResponse).onCompleted();
-    }
+    triageSvcController.generateIntakeBatteryOrder(
+        request, responseGenerateIntakeBatteryOrderResponse);
+    verify(triageSvc).generateIntakeBatteryOrder();
+    verify(responseGenerateIntakeBatteryOrderResponse)
+        .onNext(
+            GenerateIntakeBatteryOrderResponse.newBuilder()
+                .setSuccess(false)
+                .setStatus(GenerateOrderStatus.SPECSVC_GENBATTERIES_ERR)
+                .build());
+    verify(responseGenerateIntakeBatteryOrderResponse).onCompleted();
+  }
 }

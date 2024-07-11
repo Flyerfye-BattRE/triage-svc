@@ -12,27 +12,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @GrpcService
 public class TriageSvcController extends TriageSvcGrpc.TriageSvcImplBase {
-    private static final Logger logger = Logger.getLogger(TriageSvcController.class.getName());
-    private final TriageSvc triageSvc;
+  private static final Logger logger = Logger.getLogger(TriageSvcController.class.getName());
+  private final TriageSvc triageSvc;
 
-    @Autowired
-    public TriageSvcController(TriageSvc triageSvc) {
-        this.triageSvc = triageSvc;
-    }
+  @Autowired
+  public TriageSvcController(TriageSvc triageSvc) {
+    this.triageSvc = triageSvc;
+  }
 
-    @Override
-    public void generateIntakeBatteryOrder(GenerateIntakeBatteryOrderRequest request, StreamObserver<GenerateIntakeBatteryOrderResponse> responseObserver) {
-        logger.info("generateIntakeBatteryOrder() invoked");
+  @Override
+  public void generateIntakeBatteryOrder(
+      GenerateIntakeBatteryOrderRequest request,
+      StreamObserver<GenerateIntakeBatteryOrderResponse> responseObserver) {
+    logger.info("generateIntakeBatteryOrder() invoked");
 
-        GenerateOrderStatusEnum status = triageSvc.generateIntakeBatteryOrder();
-        GenerateIntakeBatteryOrderResponse response = GenerateIntakeBatteryOrderResponse.newBuilder()
-                .setSuccess(status == GenerateOrderStatusEnum.SUCCESS)
-                .setStatus(status.getgrpcStatus())
-                .build();
+    GenerateOrderStatusEnum status = triageSvc.generateIntakeBatteryOrder();
+    GenerateIntakeBatteryOrderResponse response =
+        GenerateIntakeBatteryOrderResponse.newBuilder()
+            .setSuccess(status == GenerateOrderStatusEnum.SUCCESS)
+            .setStatus(status.getgrpcStatus())
+            .build();
 
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
+    responseObserver.onNext(response);
+    responseObserver.onCompleted();
 
-        logger.info("generateIntakeBatteryOrder() finished");
-    }
+    logger.info("generateIntakeBatteryOrder() finished");
+  }
 }

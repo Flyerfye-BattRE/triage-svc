@@ -18,66 +18,65 @@ import org.springframework.stereotype.Service;
 @Service
 public class TriageSvc {
 
-    private static final Logger logger = Logger.getLogger(TriageSvc.class.getName());
-    private final GrpcMethodInvoker grpcMethodInvoker;
-    private final Random random;
+  private static final Logger logger = Logger.getLogger(TriageSvc.class.getName());
+  private final GrpcMethodInvoker grpcMethodInvoker;
+  private final Random random;
 
-    @Autowired
-    public TriageSvc(GrpcMethodInvoker grpcMethodInvoker) {
-        this.grpcMethodInvoker = grpcMethodInvoker;
-        this.random = new Random();
+  @Autowired
+  public TriageSvc(GrpcMethodInvoker grpcMethodInvoker) {
+    this.grpcMethodInvoker = grpcMethodInvoker;
+    this.random = new Random();
+  }
+
+  public GenerateOrderStatusEnum generateIntakeBatteryOrder() {
+    // Randomly decide # of battery types to include
+    int numBatteryTypes = random.nextInt(3) + 1;
+
+    List<BatteryTypeTierPair> batteryTypeTierInfo = queryRandomBatteryInfo(numBatteryTypes);
+
+    if (!batteryTypeTierInfo.isEmpty()) {
+      return processOrder(batteryTypeTierInfo);
+    } else {
+      return GenerateOrderStatusEnum.SPECSVC_GENBATTERIES_ERR;
+    }
+  }
+
+  private GenerateOrderStatusEnum processOrder(List<BatteryTypeTierPair> batteryTypeTierInfo) {
+    List<BatteryTypeTierCount> batteryTypeTierCountInfo =
+        batteryTypeTierInfo.stream()
+            .map(
+                batteryTypeTierEntry ->
+                    BatteryTypeTierCount.newBuilder()
+                        .setBatteryType(batteryTypeTierEntry.getBatteryTypeId())
+                        .setBatteryTier(batteryTypeTierEntry.getBatteryTierId())
+                        .setBatteryCount(random.nextInt(2) + 1)
+                        .build())
+            .collect(Collectors.toList());
+
+    ProcessIntakeBatteryOrderRequest request =
+        ProcessIntakeBatteryOrderRequest.newBuilder()
+            .addAllBatteries(batteryTypeTierCountInfo)
+            .build();
+
+    ProcessIntakeBatteryOrderResponse response =
+        grpcMethodInvoker.invokeNonblock("opssvc", "processIntakeBatteryOrder", request);
+
+    if (response == null) {
+      return GenerateOrderStatusEnum.UNKNOWN_ERR;
     }
 
-    public GenerateOrderStatusEnum generateIntakeBatteryOrder() {
-        //Randomly decide # of battery types to include
-        int numBatteryTypes = random.nextInt(3) + 1;
+    return response.getSuccess()
+        ? GenerateOrderStatusEnum.SUCCESS
+        : GenerateOrderStatusEnum.fromStatusDescription(response.getStatus().toString());
+  }
 
-        List<BatteryTypeTierPair> batteryTypeTierInfo = queryRandomBatteryInfo(numBatteryTypes);
+  public List<BatteryTypeTierPair> queryRandomBatteryInfo(int numBatteryTypes) {
+    GetRandomBatteryTypesRequest request =
+        GetRandomBatteryTypesRequest.newBuilder().setNumBatteryTypes(numBatteryTypes).build();
 
-        if (!batteryTypeTierInfo.isEmpty()) {
-            return processOrder(batteryTypeTierInfo);
-        } else {
-            return GenerateOrderStatusEnum.SPECSVC_GENBATTERIES_ERR;
-        }
-    }
+    GetRandomBatteryTypesResponse response =
+        grpcMethodInvoker.invokeNonblock("specsvc", "getRandomBatteryTypes", request);
 
-    private GenerateOrderStatusEnum processOrder(List<BatteryTypeTierPair> batteryTypeTierInfo) {
-        List<BatteryTypeTierCount> batteryTypeTierCountInfo =
-                batteryTypeTierInfo.stream()
-                        .map(batteryTypeTierEntry -> BatteryTypeTierCount.newBuilder()
-                                .setBatteryType(batteryTypeTierEntry.getBatteryTypeId())
-                                .setBatteryTier(batteryTypeTierEntry.getBatteryTierId())
-                                .setBatteryCount(random.nextInt(2) + 1)
-                                .build())
-                        .collect(Collectors.toList());
-
-        ProcessIntakeBatteryOrderRequest request = ProcessIntakeBatteryOrderRequest.newBuilder()
-                .addAllBatteries(batteryTypeTierCountInfo)
-                .build();
-
-        ProcessIntakeBatteryOrderResponse response = grpcMethodInvoker.invokeNonblock(
-                "opssvc",
-                "processIntakeBatteryOrder",
-                request
-        );
-
-        if (response == null) {
-            return GenerateOrderStatusEnum.UNKNOWN_ERR;
-        }
-
-        return response.getSuccess() ?
-                GenerateOrderStatusEnum.SUCCESS :
-                GenerateOrderStatusEnum.fromStatusDescription(response.getStatus().toString());
-    }
-
-    public List<BatteryTypeTierPair> queryRandomBatteryInfo(int numBatteryTypes) {
-        GetRandomBatteryTypesRequest request = GetRandomBatteryTypesRequest.newBuilder()
-                .setNumBatteryTypes(numBatteryTypes)
-                .build();
-
-        GetRandomBatteryTypesResponse response =
-                grpcMethodInvoker.invokeNonblock("specsvc", "getRandomBatteryTypes", request);
-
-        return response.getBatteriesList();
-    }
+    return response.getBatteriesList();
+  }
 }
