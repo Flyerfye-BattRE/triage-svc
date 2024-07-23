@@ -21,7 +21,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
 
+@SpringBootTest(properties = "grpc.server.port=9002")
 class TriageSvcTests {
   private static final Logger logger = Logger.getLogger(TriageSvcTests.class.getName());
 

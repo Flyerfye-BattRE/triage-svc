@@ -33,6 +33,7 @@ public class TriageSvc {
     int numBatteryTypes = random.nextInt(3) + 1;
 
     List<BatteryTypeTierPair> batteryTypeTierInfo = queryRandomBatteryInfo(numBatteryTypes);
+    logger.info("Battery info returned for " + batteryTypeTierInfo.size() + "/" + numBatteryTypes);
 
     if (!batteryTypeTierInfo.isEmpty()) {
       return processOrder(batteryTypeTierInfo);

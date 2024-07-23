@@ -36,7 +36,7 @@
         <dependency>
             <groupId>com.battre</groupId>
             <artifactId>grpc-ifc</artifactId>
-            <version>v0.1.9</version>
+            <version>v0.2.0</version>
         </dependency>
 
         <!-- Used for testing-->
